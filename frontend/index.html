@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MicroStore | Premium Shopping</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Preconnect for potentially fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <!-- 1. Logo -->
+    <a href="#" class="logo">MicroStore.</a>
+
+    <!-- 2. Center Links -->
+    <div class="nav-center">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="products.html" class="nav-link">Products</a>
+      <a href="#footer" class="nav-link">Contact</a>
+    </div>
+
+    <!-- 3. Right Icons -->
+    <div class="nav-icons">
+      <span id="user-greeting"
+        style="display:none; font-size:0.9rem; margin-right:1rem; color:var(--text-light);"></span>
+
+      <!-- Login -->
+      <button id="btn-login" class="nav-icon-btn" title="Login">
+        <i class="ph ph-sign-in"></i>
+      </button>
+
+      <!-- Register -->
+      <button id="btn-register" class="nav-icon-btn" title="Register">
+        <i class="ph ph-user-plus"></i>
+      </button>
+
+      <!-- Profile (Hidden) -->
+      <button id="btn-profile" class="nav-icon-btn" style="display:none;" title="My Profile">
+        <i class="ph ph-user-circle"></i>
+      </button>
+
+      <!-- Logout (Hidden) -->
+      <button id="btn-logout" class="nav-icon-btn" style="display:none;" title="Logout">
+        <i class="ph ph-sign-out"></i>
+      </button>
+
+      <!-- Cart -->
+      <button id="btn-cart" class="nav-icon-btn" style="position:relative;" title="Cart">
+        <i class="ph ph-shopping-cart"></i>
+        <span id="cart-count" class="cart-badge">0</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <!-- Hero Carousel -->
+  <header class="carousel-container">
+    <div class="carousel-track" id="carousel-track">
+      <div class="carousel-slide active">
+        <img src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=1200&q=80"
+          alt="Shopping">
+        <div class="carousel-caption">
+          <h1>Premium Electronics</h1>
+          <p>Upgrade your tech game today.</p>
+        </div>
+      </div>
+      <div class="carousel-slide">
+        <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80"
+          alt="Fashion">
+        <div class="carousel-caption">
+          <h1>Trending Fashion</h1>
+          <p>Style that speaks for itself.</p>
+        </div>
+      </div>
+      <div class="carousel-slide">
+        <img src="https://images.unsplash.com/photo-1513161455079-7dc1de15ef3e?auto=format&fit=crop&w=1200&q=80"
+          alt="Home">
+        <div class="carousel-caption">
+          <h1>Modern Living</h1>
+          <p>Elevate your home environment.</p>
+        </div>
+      </div>
+    </div>
+    <div class="carousel-dots" id="carousel-dots"></div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container">
+    <!-- Success View -->
+    <div id="order-success" style="display:none; text-align:center; padding: 4rem 1rem;">
+      <div class="success-checkmark"></div>
+      <h2 style="font-size: 2.5rem; color: var(--primary-color); margin-bottom: 1rem; font-weight:800;">Order Confirmed!
+      </h2>
+      <p style="font-size: 1.1rem; color: var(--text-light); margin-bottom: 2.5rem;">
+        Your order <span id="success-order-id" style="font-weight:700; color:var(--text-dark)">#123</span> has been
+        placed successfully.
+      </p>
+      <button onclick="resetShop()" class="btn-primary" style="padding: 1rem 3rem; font-size:1.1rem;">Continue
+        Shopping</button>
+    </div>
+
+    <!-- Main Shop View -->
+    <div id="main-content">
+      <div id="category-filter"
+        style="display: flex; gap: 1rem; margin-bottom: 2rem; overflow-x: auto; padding-bottom: 0.5rem;">
+        <!-- Categories injected here -->
+        <button class="nav-btn category-btn active" data-id="">All</button>
+      </div>
+
+      <!-- Visual Category Section -->
+      <section style="margin-bottom: 3rem;">
+        <h2 style="margin-bottom: 1.5rem; font-weight: 700; color: var(--primary-color);">Shop by Category</h2>
+        <div id="category-cards"
+          style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+          <!-- Injected by JS -->
+        </div>
+      </section>
+
+      <h2 style="margin-bottom: 2rem; font-weight: 700; color: var(--primary-color);">Featured Products</h2>
+      <div id="products-grid" class="products-grid">
+        <!-- Products injected here -->
+        <p>Loading products...</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Cart Panel -->
+  <div id="cart-panel">
+    <div class="cart-header">
+      <h2>Your Cart</h2>
+      <button id="btn-close-cart" class="nav-btn">✕</button>
+    </div>
+    <div id="cart-items" class="cart-items">
+      <!-- Cart Items -->
+    </div>
+    <div class="cart-footer">
+      <button id="btn-checkout" class="btn-checkout">Place Order</button>
+    </div>
+  </div>
+
+  <footer id="footer" class="footer">
+    <div class="container footer-content">
+      <div class="footer-brand">
+        <h3>MicroStore.</h3>
+        <p>Premium microservices-based e-commerce.</p>
+      </div>
+      <div class="footer-links">
+        <h4>Links</h4>
+        <a href="#">Home</a>
+        <a href="#products-grid">Products</a>
+        <a href="#">Contact</a>
+      </div>
+      <div class="footer-contact">
+        <h4>Contact</h4>
+        <p>Email: support@microstore.com</p>
+        <p>Phone: +1 234 567 890</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 Soufiane Moussa and Soufiane Laaroussi. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Auth Modal -->
+  <div id="auth-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" id="btn-close-modal">&times;</span>
+      <h2 id="modal-title" style="margin-bottom: 1.5rem;">Login</h2>
+      <form id="auth-form">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="username" required />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="password" required />
+        </div>
+        <div class="form-group extra-fields" style="display:none;">
+          <label>Address</label>
+          <input type="text" id="reg-address" placeholder="123 Main St" />
+        </div>
+        <div class="form-group extra-fields" style="display:none;">
+          <label>Phone</label>
+          <input type="text" id="reg-phone" placeholder="+1 234 567 8900" />
+        </div>
+        <button type="submit" class="btn-submit">Submit</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Profile Modal -->
+  <div id="profile-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" id="btn-close-profile">&times;</span>
+      <h2 style="margin-bottom: 1.5rem;">My Profile</h2>
+      <form id="profile-form">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="prof-username" disabled style="background:#f1f5f9;" />
+        </div>
+        <div class="form-group">
+          <label>Address</label>
+          <input type="text" id="prof-address" />
+        </div>
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="text" id="prof-phone" />
+        </div>
+        <button type="submit" class="btn-submit">Save Changes</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>

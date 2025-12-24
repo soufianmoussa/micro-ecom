@@ -1,0 +1,63 @@
+version: '3.8'
+services:
+  product-service:
+    build: ./product-service
+    ports:
+      - '4000:4000'
+    networks:
+      - micro
+    depends_on:
+      - postgres
+
+  cart-service:
+    build: ./cart-service
+    ports:
+      - '4001:4001'
+    networks:
+      - micro
+    depends_on:
+      - postgres
+
+  order-service:
+    build: ./order-service
+    ports:
+      - '4002:4002'
+    networks:
+      - micro
+    depends_on:
+      - cart-service
+      - postgres
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./db-init:/docker-entrypoint-initdb.d
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - micro
+
+  user-service:
+    build: ./user-service
+    ports:
+      - '4003:4003'
+    networks:
+      - micro
+
+  frontend:
+    build: ./frontend
+    ports:
+      - '8080:80'
+    networks:
+      - micro
+
+networks:
+  micro:
+    driver: bridge
+
+volumes:
+  pgdata:
