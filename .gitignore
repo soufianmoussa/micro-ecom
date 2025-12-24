@@ -1,0 +1,63 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Node modules
+node_modules/
+package-lock.json
+yarn.lock
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# AWS
+aws/credentials
+aws/config
+.aws/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Database files
+*.sqlite
+*.sqlite3
+*.db
+
+# Build outputs
+dist/
+build/
+out/
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# IDE settings that shouldn't be committed
+.vscode/launch.json
+.vscode/settings.json
+
+# OS-specific
+.env.production  # Store in secrets manager instead

@@ -2,17 +2,40 @@ const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 const { Pool } = require('pg');
+require('dotenv').config();
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+
+// CORS Configuration
+const corsOptions = {
+  origin: process.env.CORS_ORIGIN || 'http://localhost:8080',
+  credentials: true,
+};
+app.use(cors(corsOptions));
 
 const pool = new Pool({
   user: process.env.POSTGRES_USER || 'admin',
   host: process.env.POSTGRES_HOST || 'postgres',
   database: 'order_db',
   password: process.env.POSTGRES_PASSWORD || 'password',
-  port: 5432,
+  port: process.env.POSTGRES_PORT || 5432,
+});
+
+const CART_SERVICE_URL = process.env.CART_SERVICE_URL || 'http://cart-service:4001';
+
+// Health check endpoints
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', service: 'order-service' });
+});
+
+app.get('/ready', async (req, res) => {
+  try {
+    await pool.query('SELECT 1');
+    res.json({ status: 'ready', service: 'order-service' });
+  } catch (err) {
+    res.status(503).json({ status: 'not-ready', error: err.message });
+  }
 });
 
 // Init DB
@@ -39,7 +62,7 @@ app.post('/order', async (req, res) => {
     if (!userId) return res.status(400).json({ error: 'userId required' });
 
     // Fetch cart
-    const cartRes = await axios.get(`http://cart-service:4001/cart/${userId}`);
+    const cartRes = await axios.get(`${CART_SERVICE_URL}/cart/${userId}`);
     const cart = cartRes.data;
 
     if (!cart || !cart.items || cart.items.length === 0) {
@@ -56,11 +79,11 @@ app.post('/order', async (req, res) => {
     const orderId = result.rows[0].id;
 
     // Clear cart
-    await axios.post(`http://cart-service:4001/cart/${userId}/clear`);
+    await axios.post(`${CART_SERVICE_URL}/cart/${userId}/clear`);
 
     res.json({ id: orderId, message: 'Order created' });
   } catch (err) {
-    console.error(err);
+    console.error('Order creation error:', err);
     res.status(500).json({ error: 'Failed to create order' });
   }
 });
@@ -68,12 +91,13 @@ app.post('/order', async (req, res) => {
 app.get('/orders/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
-    const result = await pool.query('SELECT * FROM orders WHERE user_id = $1', [userId]);
+    const result = await pool.query('SELECT * FROM orders WHERE user_id = $1 ORDER BY created_at DESC', [userId]);
     res.json(result.rows);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Orders fetch error:', err);
+    res.status(500).json({ error: 'Failed to fetch orders' });
   }
 });
 
-const PORT = 4002;
+const PORT = process.env.PORT || 4002;
 app.listen(PORT, () => console.log(`Order service running on ${PORT}`));

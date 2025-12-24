@@ -1,17 +1,38 @@
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
+require('dotenv').config();
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+
+// CORS Configuration
+const corsOptions = {
+  origin: process.env.CORS_ORIGIN || 'http://localhost:8080',
+  credentials: true,
+};
+app.use(cors(corsOptions));
 
 const pool = new Pool({
   user: process.env.POSTGRES_USER || 'admin',
   host: process.env.POSTGRES_HOST || 'postgres',
   database: 'product_db',
   password: process.env.POSTGRES_PASSWORD || 'password',
-  port: 5432,
+  port: process.env.POSTGRES_PORT || 5432,
+});
+
+// Health check endpoints
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', service: 'product-service' });
+});
+
+app.get('/ready', async (req, res) => {
+  try {
+    await pool.query('SELECT 1');
+    res.json({ status: 'ready', service: 'product-service' });
+  } catch (err) {
+    res.status(503).json({ status: 'not-ready', error: err.message });
+  }
 });
 
 // Init DB
@@ -179,5 +200,5 @@ app.get('/products/:id', async (req, res) => {
   }
 });
 
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`Product service running on ${PORT}`));

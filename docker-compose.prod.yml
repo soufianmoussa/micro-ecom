@@ -1,0 +1,210 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./db-init:/docker-entrypoint-initdb.d
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - micro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    # Production resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  product-service:
+    build:
+      context: ./product-service
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      PORT: 4000
+      CORS_ORIGIN: ${CORS_ORIGIN}
+    ports:
+      - '4000:4000'
+    networks:
+      - micro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+  cart-service:
+    build:
+      context: ./cart-service
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      PORT: 4001
+      CORS_ORIGIN: ${CORS_ORIGIN}
+    ports:
+      - '4001:4001'
+    networks:
+      - micro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+  order-service:
+    build:
+      context: ./order-service
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      PORT: 4002
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      CART_SERVICE_URL: http://cart-service:4001
+    ports:
+      - '4002:4002'
+    networks:
+      - micro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      PORT: 4003
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
+    ports:
+      - '4003:4003'
+    networks:
+      - micro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        API_BASE: ${FRONTEND_API_BASE}
+        CART_BASE: ${FRONTEND_CART_BASE}
+        ORDER_BASE: ${FRONTEND_ORDER_BASE}
+        AUTH_BASE: ${FRONTEND_AUTH_BASE}
+    ports:
+      - '8080:80'
+    networks:
+      - micro
+    depends_on:
+      - product-service
+      - cart-service
+      - order-service
+      - user-service
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+        reservations:
+          cpus: '0.125'
+          memory: 128M
+
+networks:
+  micro:
+    driver: bridge
+
+volumes:
+  pgdata:
+    driver: local

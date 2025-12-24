@@ -1,7 +1,24 @@
-const apiBase = 'http://localhost:4000'; // products
-const cartBase = 'http://localhost:4001';
-const orderBase = 'http://localhost:4002';
-const authBase = 'http://localhost:4003';
+// API Configuration - Support environment variables and fallbacks
+const getConfig = () => {
+  // Try to get from window config if injected at runtime
+  if (window.API_CONFIG) {
+    return window.API_CONFIG;
+  }
+  
+  // Fallback to defaults
+  return {
+    apiBase: 'http://localhost:4000',
+    cartBase: 'http://localhost:4001',
+    orderBase: 'http://localhost:4002',
+    authBase: 'http://localhost:4003',
+  };
+};
+
+const config = getConfig();
+const apiBase = config.apiBase;
+const cartBase = config.cartBase;
+const orderBase = config.orderBase;
+const authBase = config.authBase;
 
 // State
 let currentUser = null; // { id, username, token }

@@ -10,6 +10,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <script>
+    // Configuration - Override with environment-specific values
+    window.API_CONFIG = {
+      apiBase: window.API_BASE || 'http://localhost:4000',
+      cartBase: window.CART_BASE || 'http://localhost:4001',
+      orderBase: window.ORDER_BASE || 'http://localhost:4002',
+      authBase: window.AUTH_BASE || 'http://localhost:4003',
+    };
+  </script>
 </head>
 
 <body>

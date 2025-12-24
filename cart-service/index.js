@@ -1,17 +1,38 @@
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
+require('dotenv').config();
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+
+// CORS Configuration
+const corsOptions = {
+  origin: process.env.CORS_ORIGIN || 'http://localhost:8080',
+  credentials: true,
+};
+app.use(cors(corsOptions));
 
 const pool = new Pool({
   user: process.env.POSTGRES_USER || 'admin',
   host: process.env.POSTGRES_HOST || 'postgres',
   database: 'cart_db',
   password: process.env.POSTGRES_PASSWORD || 'password',
-  port: 5432,
+  port: process.env.POSTGRES_PORT || 5432,
+});
+
+// Health check endpoints
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', service: 'cart-service' });
+});
+
+app.get('/ready', async (req, res) => {
+  try {
+    await pool.query('SELECT 1');
+    res.json({ status: 'ready', service: 'cart-service' });
+  } catch (err) {
+    res.status(503).json({ status: 'not-ready', error: err.message });
+  }
 });
 
 // Init DB
@@ -38,7 +59,8 @@ app.get('/cart/:userId', async (req, res) => {
     const result = await pool.query('SELECT product_id as "productId", qty FROM cart_items WHERE user_id = $1', [userId]);
     res.json({ items: result.rows });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Cart fetch error:', err);
+    res.status(500).json({ error: 'Failed to fetch cart' });
   }
 });
 
@@ -60,7 +82,8 @@ app.post('/cart/:userId/add', async (req, res) => {
     const result = await pool.query('SELECT product_id as "productId", qty FROM cart_items WHERE user_id = $1', [userId]);
     res.json({ items: result.rows });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Cart add error:', err);
+    res.status(500).json({ error: 'Failed to add to cart' });
   }
 });
 
@@ -70,9 +93,10 @@ app.post('/cart/:userId/clear', async (req, res) => {
     await pool.query('DELETE FROM cart_items WHERE user_id = $1', [userId]);
     res.json({ ok: true });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Cart clear error:', err);
+    res.status(500).json({ error: 'Failed to clear cart' });
   }
 });
 
-const PORT = 4001;
+const PORT = process.env.PORT || 4001;
 app.listen(PORT, () => console.log(`Cart service running on ${PORT}`));
