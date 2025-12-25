@@ -4,13 +4,13 @@ const getConfig = () => {
   if (window.API_CONFIG) {
     return window.API_CONFIG;
   }
-  
+
   // Fallback to defaults
   return {
-    apiBase: 'http://16.170.251.169:4000',
-    cartBase: 'http://16.170.251.169:4001',
-    orderBase: 'http://16.170.251.169:4002',
-    authBase: 'http://16.170.251.169:4003',
+    apiBase: '/api/products',
+    cartBase: '/api/cart',
+    orderBase: '/api/orders',
+    authBase: '/api/auth',
   };
 };
 

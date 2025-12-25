@@ -1,8 +1,8 @@
 
-const productBase = 'http://16.170.251.169:4000';
-const userBase = 'http://16.170.251.169:4003';
-const cartBase = 'http://16.170.251.169:4001';
-const orderBase = 'http://16.170.251.169:4002';
+const productBase = '/api/products';
+const userBase = '/api/auth';
+const cartBase = '/api/cart';
+const orderBase = '/api/orders';
 
 let currentUser = null;
 let currentPage = 1;
