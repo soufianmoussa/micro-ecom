@@ -7,11 +7,29 @@ const app = express();
 app.use(express.json());
 
 // CORS Configuration
+const allowedOrigins = [
+  "http://16.170.251.169",
+  "http://16.170.251.169:80",
+  "http://localhost:3000",
+  "http://localhost:8080",
+  process.env.CORS_ORIGIN
+].filter(Boolean);
+
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN || 'http://localhost:8080',
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
 };
 app.use(cors(corsOptions));
+app.options('*', cors());
 
 const pool = new Pool({
   user: process.env.POSTGRES_USER || 'admin',
