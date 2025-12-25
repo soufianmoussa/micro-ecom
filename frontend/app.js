@@ -7,10 +7,10 @@ const getConfig = () => {
   
   // Fallback to defaults
   return {
-    apiBase: 'http://localhost:4000',
-    cartBase: 'http://localhost:4001',
-    orderBase: 'http://localhost:4002',
-    authBase: 'http://localhost:4003',
+    apiBase: 'http://16.170.251.169:4000',
+    cartBase: 'http://16.170.251.169:4001',
+    orderBase: 'http://16.170.251.169:4002',
+    authBase: 'http://16.170.251.169:4003',
   };
 };
 

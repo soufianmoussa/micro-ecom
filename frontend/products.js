@@ -1,8 +1,8 @@
 
-const productBase = 'http://localhost:4000';
-const userBase = 'http://localhost:4003';
-const cartBase = 'http://localhost:4001';
-const orderBase = 'http://localhost:4002';
+const productBase = 'http://16.170.251.169:4000';
+const userBase = 'http://16.170.251.169:4003';
+const cartBase = 'http://16.170.251.169:4001';
+const orderBase = 'http://16.170.251.169:4002';
 
 let currentUser = null;
 let currentPage = 1;
