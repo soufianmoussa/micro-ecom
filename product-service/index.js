@@ -10,6 +10,7 @@ app.use(express.json());
 const allowedOrigins = [
   "http://16.170.251.169",
   "http://16.170.251.169:80",
+  "http://16.170.251.169:8080", // frontend origin
   "http://localhost:3000",
   "http://localhost:8080",
   process.env.CORS_ORIGIN
@@ -18,18 +19,17 @@ const allowedOrigins = [
 const corsOptions = {
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+
+    // IMPORTANT: don't throw an Error (it becomes 500)
+    return callback(null, false);
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+  allowedHeaders: ["Content-Type", "Authorization"],
 };
 app.use(cors(corsOptions));
-app.options('*', cors());
+app.options("*", cors(corsOptions));
 
 const pool = new Pool({
   user: process.env.POSTGRES_USER || 'admin',
